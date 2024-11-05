@@ -13,7 +13,11 @@ interface HumanDataRepository {
 
     suspend fun delete(model: HumanModel): Int
 
-    suspend fun readAll(): List<HumanModel>
+    suspend fun getAll(): List<HumanModel>
+
+    suspend fun getById(id: Long): HumanModel
 
     fun observeAll(silently: Boolean = false): Flow<Container<List<HumanModel>>>
+
+    fun observe(silently: Boolean, id: Long): Flow<Container<HumanModel>>
 }

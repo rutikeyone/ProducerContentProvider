@@ -9,5 +9,7 @@ enum class Screen {
 sealed class NavigationItem(val route: String) {
     data object List : NavigationItem(Screen.List.name)
     data object Add: NavigationItem(Screen.Add.name)
-    data object Update : NavigationItem("${Screen.Update}/{id}")
+    data object Update : NavigationItem("${Screen.Update}/{id}") {
+        const val ARG_ID = "id"
+    }
 }

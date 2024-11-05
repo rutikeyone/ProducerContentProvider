@@ -6,7 +6,6 @@ import com.contentprovider.data.HumanDataRepository
 import com.contentprovider.humans.domain.entities.Human
 import com.contentprovider.humans.domain.repositories.HumanRepository
 import com.contentprovider.producer.glue.humans.mappers.HumanMapper
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -27,6 +26,17 @@ class AdapterHumanRepository @Inject constructor(
     override suspend fun insert(model: Human): Uri {
         val humanModel = humanMapper.toHumanModel(model)
         return humanDataRepository.insert(humanModel)
+    }
+
+    override suspend fun getById(id: Long): Human {
+        val humanModel = humanDataRepository.getById(id)
+        return humanMapper.toHuman(humanModel)
+    }
+
+    override fun observeById(silently: Boolean, id: Long): Flow<Container<Human>> {
+        return humanDataRepository.observe(silently, id).map { container ->
+            container.map { model -> humanMapper.toHuman(model) }
+        }
     }
 
 }

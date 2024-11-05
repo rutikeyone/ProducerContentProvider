@@ -1,5 +1,6 @@
 package com.contentprovider.data.repositories
 
+import android.content.ContentUris
 import android.content.Context
 import android.database.ContentObserver
 import android.net.Uri
@@ -37,9 +38,20 @@ class HumanDataRepositoryImpl @Inject constructor(
                     trySend(Container.Pending)
                 }
 
-                val data = readAllWithResult()
+                val data = getAllWithResult()
                 trySend(data)
             }
+        }
+    }
+
+    override fun observe(silently: Boolean, id: Long): Flow<Container<HumanModel>> = callbackFlow {
+        requiredRead(id).collect {
+            if (!silently) {
+                trySend(Container.Pending)
+            }
+
+            val data = getWithResult(id)
+            trySend(data)
         }
     }
 
@@ -88,7 +100,7 @@ class HumanDataRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun readAll(): List<HumanModel> {
+    override suspend fun getAll(): List<HumanModel> {
         return with(ioDispatcher) {
 
             val columns = arrayOf(
@@ -136,6 +148,52 @@ class HumanDataRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun getById(id: Long): HumanModel {
+        return with(ioDispatcher) {
+
+            val columns = arrayOf(
+                BaseColumns._ID,
+                HumanContract.Entry.COLUMN_NAME_TITLE,
+                HumanContract.Entry.COLUMN_SURNAME_TITLE,
+                HumanContract.Entry.COLUMN_AGE_TITLE,
+            )
+
+            val uri = ContentUris.withAppendedId(HumanContentProvider.CONTENT_URI, id)
+
+            val cursor = context.contentResolver.query(
+                uri,
+                columns,
+                null,
+                null,
+                null,
+                null,
+            )
+
+            if (cursor == null) {
+                throw IllegalArgumentException("The cursor should not have a null value")
+            }
+
+            cursor.moveToFirst()
+
+            val idColumn = cursor.getColumnIndexOrThrow(BaseColumns._ID)
+            val nameColumn = cursor.getColumnIndexOrThrow(HumanContract.Entry.COLUMN_NAME_TITLE)
+            val surnameColumn =
+                cursor.getColumnIndexOrThrow(HumanContract.Entry.COLUMN_SURNAME_TITLE)
+            val ageColumn = cursor.getColumnIndexOrThrow(HumanContract.Entry.COLUMN_AGE_TITLE)
+
+            val idValue = cursor.getLong(idColumn)
+            val name = cursor.getString(nameColumn)
+            val surname = cursor.getString(surnameColumn)
+            val age = cursor.getInt(ageColumn)
+
+            cursor.close()
+
+            val human = HumanModel(idValue, name, surname, age)
+
+            return@with human
+        }
+    }
+
     private fun requiredReadAll(): Flow<RequiredUpdate> = callbackFlow {
         val initialRequiredUpdate = RequiredUpdate(
             firstTime = true,
@@ -153,6 +211,7 @@ class HumanDataRepositoryImpl @Inject constructor(
                 trySend(requiredUpdate)
             }
         }
+
         context.contentResolver.registerContentObserver(
             HumanContentProvider.CONTENT_URI,
             true,
@@ -164,22 +223,52 @@ class HumanDataRepositoryImpl @Inject constructor(
         }
     }
 
-    private suspend fun readAllWithResult(): Container<List<HumanModel>> {
-        return with(ioDispatcher) {
-            try {
-                delay(1000)
+    private fun requiredRead(id: Long): Flow<Boolean> = callbackFlow {
+        val initialValue = true
 
-                val data = readAll()
+        trySend(initialValue)
 
-                if (data.isEmpty()) {
-                    return@with Container.Empty
-                }
-
-                return@with Container.Data(data)
-            } catch (e: Exception) {
-                return@with Container.Error(e)
+        val observer = object : ContentObserver(null) {
+            override fun onChange(selfChange: Boolean) {
+                trySend(true)
             }
+        }
+
+        val uri = ContentUris.withAppendedId(HumanContentProvider.CONTENT_URI, id)
+
+        context.contentResolver.registerContentObserver(
+            uri,
+            true,
+            observer,
+        )
+
+        awaitClose {
+            context.contentResolver.unregisterContentObserver(observer)
         }
     }
 
+    private suspend fun getAllWithResult(): Container<List<HumanModel>> {
+        try {
+            delay(1000)
+            val data = getAll()
+
+            if (data.isEmpty()) {
+                return Container.Empty
+            }
+
+            return Container.Data(data)
+        } catch (e: Exception) {
+            return Container.Error(e)
+        }
+    }
+
+    private suspend fun getWithResult(id: Long): Container<HumanModel> {
+        try {
+            delay(1000)
+            val data = getById(id)
+            return Container.Data(data)
+        } catch (e: Exception) {
+            return Container.Error(e)
+        }
+    }
 }

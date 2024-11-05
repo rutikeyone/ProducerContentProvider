@@ -11,4 +11,7 @@ interface HumanRepository {
 
     suspend fun insert(model: Human): Uri
 
+    suspend fun getById(id: Long): Human
+
+    fun observeById(silently: Boolean, id: Long): Flow<Container<Human>>
 }

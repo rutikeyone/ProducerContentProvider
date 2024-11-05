@@ -25,6 +25,7 @@ import com.contentprovider.core.common.Container
 import com.contentprovider.core.presentation.views.PullToRefreshBox
 import com.contentprovider.humans.R
 import com.contentprovider.humans.domain.entities.Human
+import com.contentprovider.humans.presentation.list.viewmodel.HumanListViewModel
 import com.contentprovider.humans.presentation.list.views.HumanDataListView
 import com.contentprovider.humans.presentation.list.views.HumanEmptyView
 import com.contentprovider.humans.presentation.list.views.HumanErrorView

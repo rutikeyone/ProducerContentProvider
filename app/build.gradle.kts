@@ -84,6 +84,7 @@ dependencies {
     implementation(project(":data"))
     implementation(project(":features:humans"))
     implementation(project(":core:theme"))
+    implementation(project(":core:presentation"))
 
     implementation(libs.hilt.android)
     kapt(libs.hilt.android.compiler)

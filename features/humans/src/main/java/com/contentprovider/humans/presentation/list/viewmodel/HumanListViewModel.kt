@@ -1,6 +1,5 @@
-package com.contentprovider.humans.presentation.list
+package com.contentprovider.humans.presentation.list.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.contentprovider.core.common.Container
@@ -9,13 +8,8 @@ import com.contentprovider.core.presentation.flow.restartableStateIn
 import com.contentprovider.humans.domain.entities.Human
 import com.contentprovider.humans.domain.repositories.HumanRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.cache
-import kotlinx.coroutines.flow.conflate
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
 @HiltViewModel
