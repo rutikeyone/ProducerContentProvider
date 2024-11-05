@@ -1,4 +1,4 @@
-package com.contentprovider.humans.presentation.list.views
+package com.contentprovider.core.presentation.views
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,10 +12,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.contentprovider.humans.R
+import com.contentprovider.core.presentation.R
 
 @Composable
-fun HumanErrorView(
+fun AppErrorView(
     onTryAgain: () -> Unit,
 ) {
     Column(
@@ -27,7 +27,11 @@ fun HumanErrorView(
             stringResource(R.string.error),
             style = MaterialTheme.typography.bodyLarge,
         )
-        ElevatedButton(modifier = Modifier.padding(top = 16.dp), onClick = onTryAgain) {
+        ElevatedButton(
+            modifier = Modifier
+                .padding(top = 16.dp),
+            onClick = onTryAgain,
+        ) {
             Text(stringResource(R.string.try_again))
         }
     }

@@ -9,14 +9,18 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -28,7 +32,10 @@ import com.contentprovider.humans.domain.entities.Human
 import com.contentprovider.humans.presentation.list.viewmodel.HumanListViewModel
 import com.contentprovider.humans.presentation.list.views.HumanDataListView
 import com.contentprovider.humans.presentation.list.views.HumanEmptyView
-import com.contentprovider.humans.presentation.list.views.HumanErrorView
+import com.contentprovider.core.presentation.views.AppErrorView
+import com.contentprovider.humans.presentation.list.viewmodel.HumanListUiAction
+import com.contentprovider.humans.presentation.list.viewmodel.HumanListUiEvent
+import com.contentprovider.humans.presentation.update.viewmodel.HumanUpdateUiAction
 
 
 @Composable
@@ -36,18 +43,35 @@ fun HumanListPage(
     viewModel: HumanListViewModel = hiltViewModel(),
     navigateToAddHuman: () -> Unit,
     onClickItem: (Human) -> Unit,
-
-    ) {
+) {
     val uiState = viewModel.humanListFlow.collectAsStateWithLifecycle(Container.Pure)
-
+    val uiActionState = viewModel.uiActionFlow.collectAsStateWithLifecycle()
     val isRefreshing = viewModel.isRefreshing.collectAsStateWithLifecycle(false)
+
+    val snackBarHostState = remember { SnackbarHostState() }
+
+    val context = LocalContext.current
+
+    LaunchedEffect(key1 = uiActionState.value) {
+        val showSnackBarEvent = uiActionState.value?.get()
+
+        showSnackBarEvent?.let {
+            when (it) {
+                is HumanListUiAction.ShowSnackBar -> {
+                    val resource = context.getString(it.value)
+                    snackBarHostState.showSnackbar(resource)
+                }
+            }
+        }
+    }
 
     HumanListView(
         uiState = uiState,
         isRefreshing = isRefreshing,
-        onTryAgain = { viewModel.humanListFlow.restart() },
+        onEvent = { viewModel.onEvent(it) },
         navigateToAddHuman = navigateToAddHuman,
         onClickItem = onClickItem,
+        snackBarHostState = snackBarHostState,
     )
 }
 
@@ -56,17 +80,21 @@ fun HumanListPage(
 fun HumanListView(
     uiState: State<Container<List<Human>>>,
     isRefreshing: State<Boolean>,
-    onTryAgain: () -> Unit,
+    onEvent: (HumanListUiEvent) -> Unit,
     navigateToAddHuman: () -> Unit,
     onClickItem: (Human) -> Unit,
+    snackBarHostState: SnackbarHostState,
 ) {
-    Scaffold(topBar = {
-        TopAppBar(colors = topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-            titleContentColor = MaterialTheme.colorScheme.primary,
-        ), title = {
-            Text(stringResource(R.string.human_list_view))
-        })
+    Scaffold(snackbarHost = { SnackbarHost(snackBarHostState) }, topBar = {
+        TopAppBar(
+            colors = topAppBarColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                titleContentColor = MaterialTheme.colorScheme.primary,
+            ),
+            title = {
+                Text(stringResource(R.string.human_list_view))
+            },
+        )
     }, floatingActionButton = {
         FloatingActionButton(onClick = navigateToAddHuman) {
             Icon(Icons.Filled.Add, null)
@@ -75,7 +103,7 @@ fun HumanListView(
         PullToRefreshBox(
             isRefreshing = isRefreshing.value,
             onRefresh = {
-                onTryAgain()
+                onEvent(HumanListUiEvent.Restart)
             },
             modifier = Modifier
                 .fillMaxSize()
@@ -85,9 +113,12 @@ fun HumanListView(
                 is Container.Data -> HumanDataListView(
                     data = state.data,
                     onClickItem = onClickItem,
+                    onDeleteItem = { onEvent(HumanListUiEvent.Delete(it)) }
                 )
 
-                is Container.Error -> HumanErrorView(onTryAgain)
+                is Container.Error -> AppErrorView(
+                    onTryAgain = { onEvent(HumanListUiEvent.Restart) }
+                )
 
                 Container.Empty -> HumanEmptyView()
 
@@ -120,11 +151,14 @@ fun HumanListPreview() {
         mutableStateOf(true)
     }
 
+    val snackBarHostState = remember { SnackbarHostState() }
+
     HumanListView(
         uiState = uiState,
-        onTryAgain = {},
+        onEvent = {},
         navigateToAddHuman = {},
         isRefreshing = isRefreshing,
         onClickItem = {},
+        snackBarHostState = snackBarHostState,
     )
 }

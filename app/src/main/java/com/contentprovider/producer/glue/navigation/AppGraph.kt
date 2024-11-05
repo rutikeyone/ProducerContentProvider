@@ -54,7 +54,10 @@ fun AppNavHost(navController: NavHostController) {
                 factory.create(humanLongId)
             }
 
-            HumanUpdatePage(viewModel)
+            HumanUpdatePage(
+                viewModel = viewModel,
+                onNavigateBack = { navController.popBackStack() }
+            )
         }
     }
 }

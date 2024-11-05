@@ -45,7 +45,7 @@ class MainActivity : ComponentActivity(), HumanUpdateViewModel.FactoryProvider {
         }
     }
 
-    override fun provideHumanUpdateViewModelFactory(): HumanUpdateViewModel.Factory {
+    override fun provideViewModelFactory(): HumanUpdateViewModel.Factory {
         return EntryPointAccessors.fromActivity(
             this, ViewModelFactoryProvider::class.java
         ).humanUpdateViewModelFactory()

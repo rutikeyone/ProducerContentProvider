@@ -16,7 +16,7 @@ class AdapterHumanRepository @Inject constructor(
 ) : HumanRepository {
 
     override fun observeAll(silently: Boolean): Flow<Container<List<Human>>> {
-        return humanDataRepository.observeAll(silently).map { data ->
+        return humanDataRepository.observeHumans(silently).map { data ->
             return@map data.map { item ->
                 item.map { humanMapper.toHuman(it) }
             }
@@ -25,18 +25,32 @@ class AdapterHumanRepository @Inject constructor(
 
     override suspend fun insert(model: Human): Uri {
         val humanModel = humanMapper.toHumanModel(model)
-        return humanDataRepository.insert(humanModel)
+        return humanDataRepository.insertHuman(humanModel)
     }
 
-    override suspend fun getById(id: Long): Human {
-        val humanModel = humanDataRepository.getById(id)
+    override suspend fun getHuman(id: Long): Human {
+        val humanModel = humanDataRepository.getHuman(id)
         return humanMapper.toHuman(humanModel)
     }
 
-    override fun observeById(silently: Boolean, id: Long): Flow<Container<Human>> {
-        return humanDataRepository.observe(silently, id).map { container ->
+    override fun observeHuman(
+        silently: Boolean,
+        id: Long,
+        requiredObserver: Boolean,
+    ): Flow<Container<Human>> {
+        return humanDataRepository.observeHuman(silently, id, requiredObserver).map { container ->
             container.map { model -> humanMapper.toHuman(model) }
         }
+    }
+
+    override suspend fun updateHuman(human: Human): Int {
+        val humanModel = humanMapper.toHumanModel(human)
+
+        return humanDataRepository.updateHuman(humanModel)
+    }
+
+    override suspend fun deleteHuman(id: Long): Int {
+        return humanDataRepository.deleteHuman(id)
     }
 
 }

@@ -9,5 +9,5 @@ import com.contentprovider.producer.MainActivity
 fun requiredHumanUpdateViewModelFactory(): HumanUpdateViewModel.Factory {
     val context = LocalContext.current
 
-    return (context as MainActivity).provideHumanUpdateViewModelFactory()
+    return (context as MainActivity).provideViewModelFactory()
 }

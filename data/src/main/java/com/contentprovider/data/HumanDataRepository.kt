@@ -7,17 +7,20 @@ import kotlinx.coroutines.flow.Flow
 
 interface HumanDataRepository {
 
-    suspend fun insert(model: HumanModel): Uri
+    suspend fun insertHuman(model: HumanModel): Uri
 
-    suspend fun update(model: HumanModel): Int
+    suspend fun updateHuman(model: HumanModel): Int
 
-    suspend fun delete(model: HumanModel): Int
+    suspend fun deleteHuman(id: Long): Int
 
-    suspend fun getAll(): List<HumanModel>
+    suspend fun getHumans(): List<HumanModel>
 
-    suspend fun getById(id: Long): HumanModel
+    suspend fun getHuman(id: Long): HumanModel
 
-    fun observeAll(silently: Boolean = false): Flow<Container<List<HumanModel>>>
+    fun observeHumans(silently: Boolean = false): Flow<Container<List<HumanModel>>>
 
-    fun observe(silently: Boolean, id: Long): Flow<Container<HumanModel>>
+    fun observeHuman(
+        silently: Boolean, id: Long,
+        requiredObserver: Boolean = true,
+    ): Flow<Container<HumanModel>>
 }

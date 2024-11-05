@@ -1,35 +1,34 @@
-package com.contentprovider.humans.presentation.add.widgets
+package com.contentprovider.core.presentation.views
 
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.unit.dp
-import com.contentprovider.humans.R
 
 @Composable
-fun AgeTextField(
-    ageState: State<String>,
+fun AppTextField(
+    modifier: Modifier = Modifier,
+    label: String,
+    value: String? = null,
+    state: State<String>? = null,
     onValueChanged: (String) -> Unit,
+    imeAction: ImeAction = ImeAction.Done,
+    readOnly: Boolean = false,
 ) {
     TextField(
-        modifier = Modifier
-            .width(240.dp)
-            .padding(top = 16.dp),
-        value = ageState.value,
+        modifier = modifier,
+        value = value ?: state?.value ?: "",
         onValueChange = onValueChanged,
         label = {
-            Text(stringResource(R.string.age))
+            Text(label)
         },
+        readOnly = readOnly,
         singleLine = true,
         keyboardOptions = KeyboardOptions.Default.copy(
-            imeAction = ImeAction.Done,
+            imeAction = imeAction,
         ),
     )
 }

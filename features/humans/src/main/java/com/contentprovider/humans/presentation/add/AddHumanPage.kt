@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -21,15 +22,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.contentprovider.humans.R
 import com.contentprovider.humans.presentation.add.viewmodel.AddHumanViewModel
-import com.contentprovider.humans.presentation.add.widgets.AgeTextField
-import com.contentprovider.humans.presentation.add.widgets.ElevatedSaveButton
-import com.contentprovider.humans.presentation.add.widgets.NameTextField
-import com.contentprovider.humans.presentation.add.widgets.SurnameTextField
+import com.contentprovider.core.presentation.views.AppTextField
+import com.contentprovider.core.presentation.views.AppElevatedButton
+import com.contentprovider.humans.presentation.add.viewmodel.AddHumanUiEvent
 
 @Composable
 fun AddHumanPage(
@@ -39,7 +41,7 @@ fun AddHumanPage(
     val nameUiState = viewModel.name.collectAsStateWithLifecycle("")
     val surnameUiState = viewModel.surname.collectAsStateWithLifecycle("")
     val ageUiState = viewModel.age.collectAsStateWithLifecycle("")
-    val isValidateState = viewModel.isValidate.collectAsStateWithLifecycle(false)
+    val validateState = viewModel.validateState.collectAsStateWithLifecycle(false)
     val uiStateValue = viewModel.uiState.collectAsStateWithLifecycle().value
 
     val snackBarHostState = remember { SnackbarHostState() }
@@ -65,14 +67,11 @@ fun AddHumanPage(
 
     AddHumanView(
         nameUiState = nameUiState,
-        onNameChanged = { viewModel.updateName(it) },
         surnameUiState = surnameUiState,
-        onSurnameChanged = { viewModel.updateSurname(it) },
         ageUiState = ageUiState,
-        onAgeChanged = { viewModel.updateAge(it) },
-        isValidate = isValidateState,
-        onSavePressed = { viewModel.save() },
+        validateState = validateState,
         hostState = snackBarHostState,
+        onEvent = { viewModel.onEvent(it) }
     )
 }
 
@@ -80,14 +79,11 @@ fun AddHumanPage(
 @Composable
 fun AddHumanView(
     nameUiState: State<String>,
-    onNameChanged: (String) -> Unit,
     surnameUiState: State<String>,
-    onSurnameChanged: (String) -> Unit,
     ageUiState: State<String>,
-    onAgeChanged: (String) -> Unit,
-    isValidate: State<Boolean>,
-    onSavePressed: () -> Unit,
+    validateState: State<Boolean>,
     hostState: SnackbarHostState,
+    onEvent: (AddHumanUiEvent) -> Unit,
 ) {
 
     Scaffold(
@@ -108,21 +104,38 @@ fun AddHumanView(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            NameTextField(
-                nameState = nameUiState,
-                onValueChanged = onNameChanged,
+            AppTextField(
+                modifier = Modifier
+                    .width(240.dp),
+                label = stringResource(id = R.string.name),
+                state = nameUiState,
+                onValueChanged = { onEvent(AddHumanUiEvent.UpdateName(it)) },
+                imeAction = ImeAction.Next,
             )
-            SurnameTextField(
-                surnameState = surnameUiState,
-                onValueChanged = onSurnameChanged,
+            AppTextField(
+                modifier = Modifier
+                    .width(240.dp)
+                    .padding(top = 16.dp),
+                label = stringResource(id = R.string.surname),
+                state = surnameUiState,
+                onValueChanged = { onEvent(AddHumanUiEvent.UpdateSurname(it)) },
+                imeAction = ImeAction.Next,
             )
-            AgeTextField(
-                ageState = ageUiState,
-                onValueChanged = onAgeChanged,
+            AppTextField(
+                modifier = Modifier
+                    .width(240.dp)
+                    .padding(top = 16.dp),
+                label = stringResource(id = R.string.age),
+                state = ageUiState,
+                onValueChanged = { onEvent(AddHumanUiEvent.UpdateAge(it)) },
             )
-            ElevatedSaveButton(
-                enabled = isValidate,
-                onClick = onSavePressed,
+            AppElevatedButton(
+                modifier = Modifier
+                    .padding(top = 12.dp)
+                    .width(240.dp),
+                enabled = validateState.value,
+                onClick = { onEvent(AddHumanUiEvent.Save) },
+                label = stringResource(id = R.string.save)
             )
         }
     }
@@ -153,13 +166,10 @@ fun AddHumanPreview() {
 
     AddHumanView(
         nameUiState = nameUiState,
-        onNameChanged = {},
         surnameUiState = surnameUiState,
-        onSurnameChanged = {},
         ageUiState = ageUiState,
-        onAgeChanged = {},
-        isValidate = isValidateState,
-        onSavePressed = {},
+        validateState = isValidateState,
         hostState = snackBarHostState,
+        onEvent = {}
     )
 }

@@ -31,7 +31,7 @@ class HumanDataRepositoryImpl @Inject constructor(
     private val humanDataMapper: HumanDataMapper,
 ) : HumanDataRepository {
 
-    override fun observeAll(silently: Boolean) = callbackFlow {
+    override fun observeHumans(silently: Boolean) = callbackFlow {
         requiredReadAll().collect { requiredUpdate ->
             if (requiredUpdate.mustUpdate) {
                 if (!silently) {
@@ -44,8 +44,12 @@ class HumanDataRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun observe(silently: Boolean, id: Long): Flow<Container<HumanModel>> = callbackFlow {
-        requiredRead(id).collect {
+    override fun observeHuman(
+        silently: Boolean,
+        id: Long,
+        requiredObserver: Boolean,
+    ): Flow<Container<HumanModel>> = callbackFlow {
+        requiredRead(id, requiredObserver).collect {
             if (!silently) {
                 trySend(Container.Pending)
             }
@@ -55,7 +59,7 @@ class HumanDataRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun insert(model: HumanModel): Uri {
+    override suspend fun insertHuman(model: HumanModel): Uri {
         return with(ioDispatcher) {
             val values = humanDataMapper.toHumanDb(model)
 
@@ -66,14 +70,14 @@ class HumanDataRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun update(model: HumanModel): Int {
+    override suspend fun updateHuman(model: HumanModel): Int {
         return with(ioDispatcher) {
 
             val id = model.id.toString()
 
             val values = humanDataMapper.toHumanDb(model)
 
-            val selection = "${BaseColumns._ID}=?"
+            val selection = "${BaseColumns._ID} = ?"
             val selectionArgs = arrayOf(id)
 
             return@with context.contentResolver.update(
@@ -85,12 +89,10 @@ class HumanDataRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun delete(model: HumanModel): Int {
+    override suspend fun deleteHuman(id: Long): Int {
         return with(ioDispatcher) {
-            val id = model.id.toString()
-
-            val selection = "${BaseColumns._ID}=?"
-            val selectionArgs = arrayOf(id)
+            val selection = "${BaseColumns._ID} = ?"
+            val selectionArgs = arrayOf(id.toString())
 
             return@with context.contentResolver.delete(
                 HumanContentProvider.CONTENT_URI,
@@ -100,7 +102,7 @@ class HumanDataRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getAll(): List<HumanModel> {
+    override suspend fun getHumans(): List<HumanModel> {
         return with(ioDispatcher) {
 
             val columns = arrayOf(
@@ -148,7 +150,7 @@ class HumanDataRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getById(id: Long): HumanModel {
+    override suspend fun getHuman(id: Long): HumanModel {
         return with(ioDispatcher) {
 
             val columns = arrayOf(
@@ -158,13 +160,15 @@ class HumanDataRepositoryImpl @Inject constructor(
                 HumanContract.Entry.COLUMN_AGE_TITLE,
             )
 
-            val uri = ContentUris.withAppendedId(HumanContentProvider.CONTENT_URI, id)
+
+            val selection = "${BaseColumns._ID} = ?"
+            val selectionArgs = arrayOf(id.toString())
 
             val cursor = context.contentResolver.query(
-                uri,
+                HumanContentProvider.CONTENT_URI,
                 columns,
-                null,
-                null,
+                selection,
+                selectionArgs,
                 null,
                 null,
             )
@@ -223,7 +227,10 @@ class HumanDataRepositoryImpl @Inject constructor(
         }
     }
 
-    private fun requiredRead(id: Long): Flow<Boolean> = callbackFlow {
+    private fun requiredRead(
+        id: Long,
+        requiredObserver: Boolean,
+    ): Flow<Boolean> = callbackFlow {
         val initialValue = true
 
         trySend(initialValue)
@@ -236,21 +243,25 @@ class HumanDataRepositoryImpl @Inject constructor(
 
         val uri = ContentUris.withAppendedId(HumanContentProvider.CONTENT_URI, id)
 
-        context.contentResolver.registerContentObserver(
-            uri,
-            true,
-            observer,
-        )
+        if (requiredObserver) {
+            context.contentResolver.registerContentObserver(
+                uri,
+                true,
+                observer,
+            )
+        }
 
         awaitClose {
-            context.contentResolver.unregisterContentObserver(observer)
+            if (requiredObserver) {
+                context.contentResolver.unregisterContentObserver(observer)
+            }
         }
     }
 
     private suspend fun getAllWithResult(): Container<List<HumanModel>> {
         try {
             delay(1000)
-            val data = getAll()
+            val data = getHumans()
 
             if (data.isEmpty()) {
                 return Container.Empty
@@ -265,7 +276,7 @@ class HumanDataRepositoryImpl @Inject constructor(
     private suspend fun getWithResult(id: Long): Container<HumanModel> {
         try {
             delay(1000)
-            val data = getById(id)
+            val data = getHuman(id)
             return Container.Data(data)
         } catch (e: Exception) {
             return Container.Error(e)

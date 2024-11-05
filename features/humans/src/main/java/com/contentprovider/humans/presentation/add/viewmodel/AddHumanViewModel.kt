@@ -28,26 +28,35 @@ class AddHumanViewModel @Inject constructor(
     private val _age = MutableStateFlow("")
     val age = _age.asStateFlow()
 
-    private val _uiState = MutableStateFlow(UiState())
+    private val _uiState = MutableStateFlow(AddHumanUiState())
     val uiState = _uiState.asStateFlow()
 
-    val isValidate = combine(_name, _surname, _age) { name, surname, age ->
+    val validateState = combine(_name, _surname, _age) { name, surname, age ->
         return@combine validate(name, surname, age)
     }
 
-    fun updateName(value: String) {
+    fun onEvent(event: AddHumanUiEvent) {
+        when(event) {
+            is AddHumanUiEvent.UpdateAge -> updateAge(event.value)
+            is AddHumanUiEvent.UpdateName -> updateName(event.value)
+            is AddHumanUiEvent.UpdateSurname -> updateSurname(event.value)
+            AddHumanUiEvent.Save -> saveHuman()
+        }
+    }
+
+    private fun updateName(value: String) {
         _name.tryEmit(value)
     }
 
-    fun updateSurname(value: String) {
+    private fun updateSurname(value: String) {
         _surname.tryEmit(value)
     }
 
-    fun updateAge(value: String) {
+    private fun updateAge(value: String) {
         _age.tryEmit(value)
     }
 
-    fun save() {
+    private fun saveHuman() {
         viewModelScope.launch {
             val name = _name.value;
             val surname = _surname.value;
@@ -79,7 +88,7 @@ class AddHumanViewModel @Inject constructor(
         }
     }
 
-    private suspend fun handleSaveResult(result: Result<Uri>) {
+    private fun handleSaveResult(result: Result<Uri>) {
         val isSuccess = result.isSuccess
         val isFailure = result.isFailure
 
