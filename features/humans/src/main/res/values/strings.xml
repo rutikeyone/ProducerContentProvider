@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="human_list_view">Human List View</string>
+    <string name="error">Oops! An error has occurred</string>
+    <string name="try_again">Try again</string>
+    <string name="the_list_is_empty">The list is empty</string>
+    <string name="details">Details</string>
+    <string name="add_human">Add Human</string>
+    <string name="name">Name</string>
+    <string name="surname">Surname</string>
+    <string name="age">Age</string>
+    <string name="save">Save</string>
+    <string name="data_has_been_successfully_added">Data has been successfully added</string>
+    <string name="an_error_has_occurred">An error has occurred</string>
+    <string name="user_data">Id:%1d, Name:%2s, Surname:%3s, Age:%4d</string>
+    <string name="update">Update</string>
+</resources>
