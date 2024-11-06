@@ -25,6 +25,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.wear.compose.material.ExperimentalWearMaterialApi
 import com.contentprovider.core.common.Container
 import com.contentprovider.core.presentation.views.PullToRefreshBox
 import com.contentprovider.humans.R
@@ -75,7 +76,7 @@ fun HumanListPage(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalWearMaterialApi::class)
 @Composable
 fun HumanListView(
     uiState: State<Container<List<Human>>>,

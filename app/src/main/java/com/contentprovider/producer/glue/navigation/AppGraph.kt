@@ -6,6 +6,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import androidx.wear.compose.material.ExperimentalWearMaterialApi
 import com.contentprovider.core.presentation.assistedViewModel
 import com.contentprovider.humans.presentation.add.AddHumanPage
 import com.contentprovider.humans.presentation.update.HumanUpdatePage

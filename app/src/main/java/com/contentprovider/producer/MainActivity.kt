@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.rememberNavController
+import androidx.wear.compose.material.ExperimentalWearMaterialApi
 import com.contentprovider.producer.glue.navigation.AppNavHost
 import com.contentprovider.core.theme.ProducerContentProviderTheme
 import com.contentprovider.humans.presentation.update.viewmodel.HumanUpdateViewModel
