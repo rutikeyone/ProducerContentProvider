@@ -15,9 +15,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -35,31 +32,23 @@ fun HumanUpdatePage(
     viewModel: HumanUpdateViewModel,
     onNavigateBack: () -> Unit,
 ) {
-    val uiState =
-        viewModel.uiState
-            .collectAsStateWithLifecycle(initialValue = HumanUpdateUiState.Pending)
+    val focusManager = LocalFocusManager.current
 
-    val refreshingState = viewModel.refreshingState
-        .collectAsStateWithLifecycle(false)
-
+    val uiState = viewModel.uiState.collectAsStateWithLifecycle(HumanUpdateUiState.Pending)
+    val refreshingState = viewModel.refreshState.collectAsStateWithLifecycle(false)
     val uiActionState = viewModel.uiActionFlow.collectAsStateWithLifecycle()
 
     val snackBarHostState = remember { SnackbarHostState() }
 
-    val context = LocalContext.current
-    val focusManager = LocalFocusManager.current
+    LaunchedEffect(Unit) {
+        viewModel.obtainEvent(HumanUpdateUiEvent.ObserveDetails)
+    }
 
     LaunchedEffect(key1 = uiActionState.value) {
-        val showSnackBarEvent = uiActionState.value?.get()
-
-        showSnackBarEvent?.let {
-            when(it) {
-                HumanUpdateUiAction.HideFocus -> { focusManager.clearFocus(true) }
-                HumanUpdateUiAction.NavigateBack -> { onNavigateBack() }
-                is HumanUpdateUiAction.ShowSnackBar -> {
-                    val resource = context.getString(it.value)
-                    snackBarHostState.showSnackbar(resource)
-                }
+        uiActionState.value?.get()?.let {
+            when (it) {
+                HumanUpdateUiAction.HideFocus -> focusManager.clearFocus(true)
+                HumanUpdateUiAction.NavigateBack -> onNavigateBack()
             }
         }
     }
@@ -67,7 +56,7 @@ fun HumanUpdatePage(
     HumanUpdateView(
         humanUpdateUiState = uiState,
         isRefreshingState = refreshingState,
-        onEvent = { viewModel.onEvent(it) },
+        onEvent = { viewModel.obtainEvent(it) },
         snackBarHostState = snackBarHostState,
     )
 }

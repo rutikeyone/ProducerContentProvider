@@ -3,6 +3,11 @@ package com.contentprovider.humans.presentation.update.viewmodel
 import com.contentprovider.humans.domain.entities.Human
 
 sealed class HumanUpdateUiState {
+
+    open fun getOrNull(): Data? {
+        return null
+    }
+
     data object Pure : HumanUpdateUiState()
 
     data object Pending : HumanUpdateUiState()
@@ -19,11 +24,21 @@ sealed class HumanUpdateUiState {
         val validateStatue: Boolean
             get() {
                 val ageLongOrNull = age.toLongOrNull()
-                val hasDifferent =
-                    name != human.name || surname != human.surname || age.toIntOrNull() != human.age;
+                val nameDifferent = name != human.name
+                val surnameDifferent = surname != human.surname
+                val ageDifferent = age.toIntOrNull() != human.age
 
-                return name.isNotEmpty() && surname.isNotEmpty() && ageLongOrNull != null && hasDifferent
+                val hasDifferent =
+                    nameDifferent || surnameDifferent || ageDifferent
+
+                val hasData = name.isNotEmpty() && surname.isNotEmpty() && ageLongOrNull != null
+
+                return hasData && hasDifferent
             }
+
+        override fun getOrNull(): Data {
+            return this
+        }
 
     }
 

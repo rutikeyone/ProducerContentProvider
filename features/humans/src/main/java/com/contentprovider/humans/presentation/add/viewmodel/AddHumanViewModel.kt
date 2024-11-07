@@ -36,7 +36,7 @@ class AddHumanViewModel @Inject constructor(
     }
 
     fun onEvent(event: AddHumanUiEvent) {
-        when(event) {
+        when (event) {
             is AddHumanUiEvent.UpdateAge -> updateAge(event.value)
             is AddHumanUiEvent.UpdateName -> updateName(event.value)
             is AddHumanUiEvent.UpdateSurname -> updateSurname(event.value)
@@ -61,63 +61,33 @@ class AddHumanViewModel @Inject constructor(
             val name = _name.value;
             val surname = _surname.value;
             val age = _age.value
-            val ageIntOrNull = age.toIntOrNull()
 
-            val validateStatus = validate(name, surname, age)
-            if (!validateStatus || ageIntOrNull == null) {
-                return@launch
-            }
-
-            val human = Human(
-                name = name,
-                surname = surname,
-                age = ageIntOrNull,
+            humanRepository.insert(
+                newName = name,
+                newSurname = surname,
+                newAge = age,
             )
-
-            val insertResult = saveData(human)
-            handleSaveResult(insertResult)
+            handleSaveResult()
         }
     }
 
-    private suspend fun saveData(human: Human): Result<Uri> {
-        try {
-            val uri = humanRepository.insert(human)
-            return Result.success(uri)
-        } catch (e: Exception) {
-            return Result.failure(e)
-        }
-    }
-
-    private fun handleSaveResult(result: Result<Uri>) {
-        val isSuccess = result.isSuccess
-        val isFailure = result.isFailure
-
-        val uri = result.getOrNull()
-        val exception = result.exceptionOrNull()
-
+    private fun handleSaveResult() {
         val uiState = _uiState.value
 
-        if (isSuccess && uri != null) {
-            val successUiState = uiState.copy(
-                showSnackBarEvent = Event(R.string.data_has_been_successfully_added),
-                navigateBackEvent = Event(Unit)
-            )
-
-            _uiState.tryEmit(successUiState)
-
-        } else if (isFailure && exception != null) {
-            val failureUiState = uiState.copy(
-                showSnackBarEvent = Event(R.string.an_error_has_occurred),
-            )
-
-            _uiState.value = failureUiState
-        }
+        val successUiState = uiState.copy(
+            showSnackBarEvent = Event(R.string.data_has_been_successfully_added),
+            navigateBackEvent = Event(Unit)
+        )
+        _uiState.tryEmit(successUiState)
     }
 
     private fun validate(name: String, surname: String, age: String): Boolean {
-        val ageInt = age.toIntOrNull()
+        val ageIntOrNull = age.toIntOrNull()
+        val nameIsNotEmpty = name.isNotEmpty()
+        val surnameIsNotEmpty = surname.isNotEmpty()
+        val ageNotNull = ageIntOrNull != null
 
-        return name.isNotEmpty() && surname.isNotEmpty() && ageInt != null
+        return nameIsNotEmpty && surnameIsNotEmpty && ageNotNull
     }
 
 }

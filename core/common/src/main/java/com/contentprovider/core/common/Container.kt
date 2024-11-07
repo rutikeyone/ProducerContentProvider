@@ -67,7 +67,10 @@ sealed class Container<out T> {
 
     data class Data<T>(val data: T) : Container<T>() {
         override suspend fun <R> suspendMap(mapper: (suspend (T) -> R)?): Container<R> {
-            if (mapper == null) throw IllegalStateException("Can't map Container.Success without mapper")
+            if (mapper == null) {
+                throw IllegalStateException("Can't map Container.Success without mapper")
+            }
+
             return try {
                 Data(mapper(data))
             } catch (e: Exception) {

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="invalid_name">Invalid name</string>
+    <string name="invalid_surname">Invalid surname</string>
+    <string name="invalid_age">Invalid age</string>
+    <string name="an_error_has_occurred">An error has occurred</string>
+</resources>

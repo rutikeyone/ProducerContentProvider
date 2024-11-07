@@ -16,7 +16,10 @@ import com.contentprovider.producer.glue.humans.requiredHumanUpdateViewModelFact
 
 @Composable
 fun AppNavHost(navController: NavHostController) {
-    NavHost(navController = navController, startDestination = NavigationItem.List.route) {
+    NavHost(
+        navController = navController,
+        startDestination = NavigationItem.List.route,
+    ) {
         composable(NavigationItem.List.route) {
             HumanListPage(
                 navigateToAddHuman = {

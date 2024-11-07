@@ -9,7 +9,11 @@ interface HumanRepository {
 
     fun observeAll(silently: Boolean = false): Flow<Container<List<Human>>>
 
-    suspend fun insert(model: Human): Uri
+    suspend fun insert(
+        newName: String,
+        newSurname: String,
+        newAge: String,
+    ): Uri
 
     suspend fun getHuman(id: Long): Human
 
@@ -19,7 +23,12 @@ interface HumanRepository {
         requiredObserver: Boolean = true,
     ): Flow<Container<Human>>
 
-    suspend fun updateHuman(human: Human): Int
+    suspend fun updateHuman(
+        initialHuman: Human,
+        newName: String,
+        newSurname: String,
+        newAge: String,
+    ): Int
 
     suspend fun deleteHuman(id: Long): Int
 

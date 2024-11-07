@@ -7,14 +7,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
@@ -42,7 +37,7 @@ fun HumanDataUpdateView(
                 .padding(top = 16.dp),
             label = stringResource(id = R.string.name),
             value = state.name,
-            onValueChanged = { onEvent(HumanUpdateUiEvent.Name(it)) },
+            onValueChanged = { onEvent(HumanUpdateUiEvent.UpdateName(it)) },
             imeAction = ImeAction.Next,
         )
         AppTextField(
@@ -51,7 +46,7 @@ fun HumanDataUpdateView(
                 .padding(top = 16.dp),
             label = stringResource(id = R.string.surname),
             value = state.surname,
-            onValueChanged = { onEvent(HumanUpdateUiEvent.Surname(it)) },
+            onValueChanged = { onEvent(HumanUpdateUiEvent.UpdateSurname(it)) },
             imeAction = ImeAction.Next,
         )
         AppTextField(
@@ -60,7 +55,7 @@ fun HumanDataUpdateView(
                 .padding(top = 16.dp),
             label = stringResource(id = R.string.age),
             value = state.age,
-            onValueChanged = { onEvent(HumanUpdateUiEvent.Age(it)) },
+            onValueChanged = { onEvent(HumanUpdateUiEvent.UpdateAge(it)) },
         )
         AppElevatedButton(
             modifier = Modifier

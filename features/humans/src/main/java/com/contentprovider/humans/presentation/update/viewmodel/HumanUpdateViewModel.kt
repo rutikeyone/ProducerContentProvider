@@ -1,11 +1,9 @@
 package com.contentprovider.humans.presentation.update.viewmodel
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.contentprovider.core.common.Container
+import com.contentprovider.core.presentation.BaseViewModel
 import com.contentprovider.core.presentation.Event
 import com.contentprovider.core.presentation.flow.restartableStateIn
-import com.contentprovider.humans.R
 import com.contentprovider.humans.domain.entities.Human
 import com.contentprovider.humans.domain.repositories.HumanRepository
 import dagger.assisted.Assisted
@@ -24,14 +22,15 @@ private const val requiredObserver = false
 class HumanUpdateViewModel @AssistedInject constructor(
     @Assisted private val id: Long,
     private val humanRepository: HumanRepository,
-) : ViewModel() {
+) : BaseViewModel() {
 
     private val humanDetailsFlow =
-        humanRepository.observeHuman(silently, id, requiredObserver).restartableStateIn(
-            viewModelScope,
-            SharingStarted.Lazily,
-            Container.Pending,
-        )
+        humanRepository.observeHuman(silently, id, requiredObserver)
+            .restartableStateIn(
+                viewModelScope,
+                SharingStarted.Lazily,
+                Container.Pending,
+            )
 
     private val _uiState: MutableStateFlow<HumanUpdateUiState> =
         MutableStateFlow(HumanUpdateUiState.Pending)
@@ -41,15 +40,9 @@ class HumanUpdateViewModel @AssistedInject constructor(
         MutableStateFlow(null)
     val uiActionFlow = _uiActionFlow.asStateFlow()
 
-    val refreshingState = humanDetailsFlow.map {
-        it is Container.Pending
-    }
+    val refreshState = humanDetailsFlow.map { it is Container.Pending }
 
-    init {
-        observeHumanDetails()
-    }
-
-    private fun observeHumanDetails() {
+    private fun observeDetails() {
         viewModelScope.launch {
             humanDetailsFlow.collect { container ->
                 _uiState.update {
@@ -60,11 +53,12 @@ class HumanUpdateViewModel @AssistedInject constructor(
         }
     }
 
-    fun onEvent(event: HumanUpdateUiEvent) {
-        when (event) {
-            is HumanUpdateUiEvent.Age -> updateAge(event.value)
-            is HumanUpdateUiEvent.Name -> updateName(event.value)
-            is HumanUpdateUiEvent.Surname -> updateSurname(event.value)
+    fun obtainEvent(humanUpdateUiEvent: HumanUpdateUiEvent) {
+        when (humanUpdateUiEvent) {
+            is HumanUpdateUiEvent.UpdateAge -> updateAge(humanUpdateUiEvent.value)
+            is HumanUpdateUiEvent.UpdateName -> updateName(humanUpdateUiEvent.value)
+            is HumanUpdateUiEvent.UpdateSurname -> updateSurname(humanUpdateUiEvent.value)
+            HumanUpdateUiEvent.ObserveDetails -> observeDetails()
             HumanUpdateUiEvent.Restart -> restart()
             HumanUpdateUiEvent.Update -> updateHuman()
             HumanUpdateUiEvent.Delete -> deleteHuman()
@@ -72,27 +66,24 @@ class HumanUpdateViewModel @AssistedInject constructor(
     }
 
     private fun updateName(name: String) {
-        val state = uiState.value
-        if (state !is HumanUpdateUiState.Data) return
-
-        val newState = state.copy(name = name)
-        _uiState.tryEmit(newState)
+        uiState.value.getOrNull()?.let {
+            val newState = it.copy(name = name)
+            _uiState.tryEmit(newState)
+        }
     }
 
     private fun updateSurname(surname: String) {
-        val state = uiState.value
-        if (state !is HumanUpdateUiState.Data) return
-
-        val newState = state.copy(surname = surname)
-        _uiState.tryEmit(newState)
+        uiState.value.getOrNull()?.let {
+            val newState = it.copy(surname = surname)
+            _uiState.tryEmit(newState)
+        }
     }
 
     private fun updateAge(age: String) {
-        val state = uiState.value
-        if (state !is HumanUpdateUiState.Data) return
-
-        val newState = state.copy(age = age)
-        _uiState.tryEmit(newState)
+        uiState.value.getOrNull()?.let {
+            val newState = it.copy(age = age)
+            _uiState.tryEmit(newState)
+        }
     }
 
     private fun restart() {
@@ -100,57 +91,24 @@ class HumanUpdateViewModel @AssistedInject constructor(
     }
 
     private fun updateHuman() {
+        val state = uiState.value.getOrNull() ?: return
+
         viewModelScope.launch {
-            val state = uiState.value
-            if (state !is HumanUpdateUiState.Data) return@launch
+            hideFocus()
 
-            val name = state.name
-            val surname = state.surname
-            val age = state.age
-            val ageIntOrNull = age.toIntOrNull()
-
-            val validateStatus = state.validateStatue
-            if (!validateStatus || ageIntOrNull == null) {
-                return@launch
-            }
-
-            val human = state.human.copy(
-                name = name,
-                surname = surname,
-                age = ageIntOrNull,
+            val id = humanRepository.updateHuman(
+                initialHuman = state.human,
+                newName = state.name,
+                newSurname = state.surname,
+                newAge = state.age,
             )
-
-            val updateResult = updateData(human)
-            handleResult(updateResult)
+            handleResult(id)
         }
     }
 
-    private suspend fun updateData(human: Human): Result<Int> {
-        try {
-            val id = humanRepository.updateHuman(human)
-            return Result.success(id)
-        } catch (e: Exception) {
-            return Result.failure(e)
-        }
-    }
-
-    private fun handleResult(result: Result<Int>) {
-        val state = uiState.value
-        if (state !is HumanUpdateUiState.Data) return
-
-        val isSuccess = result.isSuccess
-        val isFailure = result.isFailure
-
-        val id = result.getOrNull()
-        val exception = result.exceptionOrNull()
-
-        if (isSuccess && id != null) {
-            val uiAction = HumanUpdateUiAction.NavigateBack
-            val uiEvent = Event(uiAction)
-
-            _uiActionFlow.tryEmit(uiEvent)
-        } else if (isFailure && exception != null) {
-            val uiAction = HumanUpdateUiAction.ShowSnackBar(R.string.an_error_has_occurred)
+    private fun handleResult(id: Int) {
+        uiState.value.getOrNull().let {
+            val uiAction = HumanUpdateUiAction.navigateBack()
             val uiEvent = Event(uiAction)
 
             _uiActionFlow.tryEmit(uiEvent)
@@ -158,21 +116,13 @@ class HumanUpdateViewModel @AssistedInject constructor(
     }
 
     private fun deleteHuman() {
+        val state = uiState.value.getOrNull() ?: return
+
         viewModelScope.launch {
-            val state = uiState.value
-            if (state !is HumanUpdateUiState.Data) return@launch
+            val id = state.human.id
+            val deletedId = humanRepository.deleteHuman(id)
 
-            val deleteResult = deleteData(state.human)
-            handleResult(deleteResult)
-        }
-    }
-
-    private suspend fun deleteData(human: Human): Result<Int> {
-        try {
-            val id = humanRepository.deleteHuman(human.id)
-            return Result.success(id)
-        } catch (e: Exception) {
-            return Result.failure(e)
+            handleResult(deletedId)
         }
     }
 
@@ -190,6 +140,13 @@ class HumanUpdateViewModel @AssistedInject constructor(
 
             is Container.Error -> HumanUpdateUiState.Error(container.error)
         }
+    }
+
+    private fun hideFocus() {
+        val uiAction = HumanUpdateUiAction.hideFocus()
+        val uiEvent = Event(uiAction)
+
+        _uiActionFlow.tryEmit(uiEvent)
     }
 
     @AssistedFactory

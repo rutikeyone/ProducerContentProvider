@@ -72,8 +72,8 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    implementation(project(":core:common"))
     implementation(libs.androidx.compose.material)
+    implementation(project(":core:common-impl"))
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -82,13 +82,15 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-    implementation(project(":data"))
-    implementation(project(":features:humans"))
-    implementation(project(":core:theme"))
-    implementation(project(":core:presentation"))
-
     implementation(libs.hilt.android)
     kapt(libs.hilt.android.compiler)
 
     implementation (libs.androidx.navigation.compose)
+
+    implementation(project(":data"))
+    implementation(project(":features:humans"))
+    implementation(project(":core:theme"))
+    implementation(project(":core:presentation"))
+    implementation(project(":core:common"))
+    implementation(project(":wiring"))
 }

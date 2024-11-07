@@ -36,7 +36,6 @@ import com.contentprovider.humans.presentation.list.views.HumanEmptyView
 import com.contentprovider.core.presentation.views.AppErrorView
 import com.contentprovider.humans.presentation.list.viewmodel.HumanListUiAction
 import com.contentprovider.humans.presentation.list.viewmodel.HumanListUiEvent
-import com.contentprovider.humans.presentation.update.viewmodel.HumanUpdateUiAction
 
 
 @Composable
@@ -45,13 +44,13 @@ fun HumanListPage(
     navigateToAddHuman: () -> Unit,
     onClickItem: (Human) -> Unit,
 ) {
+    val context = LocalContext.current
+
     val uiState = viewModel.humanListFlow.collectAsStateWithLifecycle(Container.Pure)
     val uiActionState = viewModel.uiActionFlow.collectAsStateWithLifecycle()
-    val isRefreshing = viewModel.isRefreshing.collectAsStateWithLifecycle(false)
+    val isRefreshing = viewModel.isRefreshFlow.collectAsStateWithLifecycle(false)
 
     val snackBarHostState = remember { SnackbarHostState() }
-
-    val context = LocalContext.current
 
     LaunchedEffect(key1 = uiActionState.value) {
         val showSnackBarEvent = uiActionState.value?.get()
@@ -140,7 +139,6 @@ fun HumanListPreview() {
     )
 
     val pendingContainer = Container.Pending
-    val errorContainer = Container.Error(error = Exception())
     val emptyContainer = Container.Empty
     val dataContainer = Container.Data(humans)
 

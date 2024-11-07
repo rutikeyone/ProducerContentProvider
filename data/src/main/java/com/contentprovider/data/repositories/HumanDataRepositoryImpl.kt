@@ -6,6 +6,9 @@ import android.database.ContentObserver
 import android.net.Uri
 import android.provider.BaseColumns
 import com.contentprovider.core.common.Container
+import com.contentprovider.core.common.InvalidAge
+import com.contentprovider.core.common.InvalidName
+import com.contentprovider.core.common.InvalidSurname
 import com.contentprovider.data.HumanDataRepository
 import com.contentprovider.data.db.HumanContract
 import com.contentprovider.data.di.IODispatcher
@@ -19,6 +22,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import javax.inject.Inject
+
+private const val idSelection = "${BaseColumns._ID} = ?"
 
 data class RequiredUpdate(
     val firstTime: Boolean,
@@ -59,44 +64,107 @@ class HumanDataRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun insertHuman(model: HumanModel): Uri {
+    override suspend fun insertHuman(
+        newName: String,
+        newSurname: String,
+        newAge: String,
+    ): Uri {
         return with(ioDispatcher) {
-            val values = humanDataMapper.toHumanDb(model)
+            val age = newAge.toIntOrNull()
 
-            return@with context.contentResolver.insert(
+            val validateError = validateHumanData(
+                newName = newName,
+                newSurname = newSurname,
+                newAge = age,
+            )
+
+            if (validateError != null) {
+                throw validateError
+            }
+
+            val newHuman = HumanModel(
+                name = newName,
+                surname = newSurname,
+                age = age ?: 0,
+            )
+
+            val values = humanDataMapper.toHumanDb(newHuman)
+
+            val result = context.contentResolver.insert(
                 HumanContentProvider.CONTENT_URI,
                 values,
-            ) ?: throw IllegalStateException("The value is null when the element is inserted")
+            )
+
+            return@with requireNotNull(result)
         }
     }
 
-    override suspend fun updateHuman(model: HumanModel): Int {
+    override suspend fun updateHuman(
+        initialHuman: HumanModel,
+        newName: String,
+        newSurname: String,
+        newAge: String,
+    ): Int {
         return with(ioDispatcher) {
+            val age = newAge.toIntOrNull()
 
-            val id = model.id.toString()
+            val validateError = validateHumanData(
+                newName = newName,
+                newSurname = newSurname,
+                newAge = age,
+            )
 
-            val values = humanDataMapper.toHumanDb(model)
+            if (validateError != null) {
+                throw validateError
+            }
 
-            val selection = "${BaseColumns._ID} = ?"
+            val newHuman = initialHuman.copy(
+                name = newName,
+                surname = newSurname,
+                age = age ?: initialHuman.age,
+            )
+
+            val id = newHuman.id.toString()
             val selectionArgs = arrayOf(id)
 
-            return@with context.contentResolver.update(
+            val values = humanDataMapper.toHumanDb(newHuman)
+
+            val result = context.contentResolver.update(
                 HumanContentProvider.CONTENT_URI,
                 values,
-                selection,
+                idSelection,
                 selectionArgs,
             )
+
+            return@with result
+        }
+    }
+
+    private fun validateHumanData(
+        newName: String,
+        newSurname: String,
+        newAge: Int?,
+    ): Exception? {
+        val nameEmpty = newName.isEmpty()
+        val surnameEmpty = newSurname.isEmpty()
+        val ageNull = newAge == null
+
+        return when {
+            nameEmpty -> InvalidName()
+            surnameEmpty -> InvalidSurname()
+            ageNull -> InvalidAge()
+            else -> null
         }
     }
 
     override suspend fun deleteHuman(id: Long): Int {
         return with(ioDispatcher) {
-            val selection = "${BaseColumns._ID} = ?"
-            val selectionArgs = arrayOf(id.toString())
+            val idString = id.toString()
+            val selectionArgs = arrayOf(idString)
 
             return@with context.contentResolver.delete(
                 HumanContentProvider.CONTENT_URI,
-                selection,
+                idSelection,
                 selectionArgs,
             )
         }
@@ -105,25 +173,16 @@ class HumanDataRepositoryImpl @Inject constructor(
     override suspend fun getHumans(): List<HumanModel> {
         return with(ioDispatcher) {
 
-            val columns = arrayOf(
-                BaseColumns._ID,
-                HumanContract.Entry.COLUMN_NAME_TITLE,
-                HumanContract.Entry.COLUMN_SURNAME_TITLE,
-                HumanContract.Entry.COLUMN_AGE_TITLE,
-            )
-
             val cursor = context.contentResolver.query(
                 HumanContentProvider.CONTENT_URI,
-                columns,
+                HumanContract.Entry.COLUMNS,
                 null,
                 null,
                 null,
                 null,
             )
 
-            if (cursor == null) {
-                throw IllegalArgumentException("The cursor should not have a null value")
-            }
+            requireNotNull(cursor)
 
             val idColumn = cursor.getColumnIndexOrThrow(BaseColumns._ID)
             val nameColumn = cursor.getColumnIndexOrThrow(HumanContract.Entry.COLUMN_NAME_TITLE)
@@ -145,37 +204,24 @@ class HumanDataRepositoryImpl @Inject constructor(
                 }
             }
 
-
             return@with result;
         }
     }
 
     override suspend fun getHuman(id: Long): HumanModel {
         return with(ioDispatcher) {
-
-            val columns = arrayOf(
-                BaseColumns._ID,
-                HumanContract.Entry.COLUMN_NAME_TITLE,
-                HumanContract.Entry.COLUMN_SURNAME_TITLE,
-                HumanContract.Entry.COLUMN_AGE_TITLE,
-            )
-
-
-            val selection = "${BaseColumns._ID} = ?"
             val selectionArgs = arrayOf(id.toString())
 
             val cursor = context.contentResolver.query(
                 HumanContentProvider.CONTENT_URI,
-                columns,
-                selection,
+                HumanContract.Entry.COLUMNS,
+                idSelection,
                 selectionArgs,
                 null,
                 null,
             )
 
-            if (cursor == null) {
-                throw IllegalArgumentException("The cursor should not have a null value")
-            }
+            requireNotNull(cursor)
 
             cursor.moveToFirst()
 
@@ -192,7 +238,12 @@ class HumanDataRepositoryImpl @Inject constructor(
 
             cursor.close()
 
-            val human = HumanModel(idValue, name, surname, age)
+            val human = HumanModel(
+                id = idValue,
+                name = name,
+                surname = surname,
+                age = age,
+            )
 
             return@with human
         }
@@ -203,7 +254,6 @@ class HumanDataRepositoryImpl @Inject constructor(
             firstTime = true,
             mustUpdate = true,
         )
-
         trySend(initialRequiredUpdate)
 
         val observer = object : ContentObserver(null) {
@@ -232,7 +282,6 @@ class HumanDataRepositoryImpl @Inject constructor(
         requiredObserver: Boolean,
     ): Flow<Boolean> = callbackFlow {
         val initialValue = true
-
         trySend(initialValue)
 
         val observer = object : ContentObserver(null) {
@@ -241,7 +290,10 @@ class HumanDataRepositoryImpl @Inject constructor(
             }
         }
 
-        val uri = ContentUris.withAppendedId(HumanContentProvider.CONTENT_URI, id)
+        val uri = ContentUris.withAppendedId(
+            HumanContentProvider.CONTENT_URI,
+            id,
+        )
 
         if (requiredObserver) {
             context.contentResolver.registerContentObserver(
@@ -261,12 +313,13 @@ class HumanDataRepositoryImpl @Inject constructor(
     private suspend fun getAllWithResult(): Container<List<HumanModel>> {
         try {
             delay(1000)
-            val data = getHumans()
 
-            if (data.isEmpty()) {
+            val data = getHumans()
+            val dataEmpty = data.isEmpty()
+
+            if (dataEmpty) {
                 return Container.Empty
             }
-
             return Container.Data(data)
         } catch (e: Exception) {
             return Container.Error(e)
@@ -276,6 +329,7 @@ class HumanDataRepositoryImpl @Inject constructor(
     private suspend fun getWithResult(id: Long): Container<HumanModel> {
         try {
             delay(1000)
+
             val data = getHuman(id)
             return Container.Data(data)
         } catch (e: Exception) {

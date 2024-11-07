@@ -23,9 +23,16 @@ class AdapterHumanRepository @Inject constructor(
         }
     }
 
-    override suspend fun insert(model: Human): Uri {
-        val humanModel = humanMapper.toHumanModel(model)
-        return humanDataRepository.insertHuman(humanModel)
+    override suspend fun insert(
+        newName: String,
+        newSurname: String,
+        newAge: String,
+    ): Uri {
+        return humanDataRepository.insertHuman(
+            newName = newName,
+            newSurname = newSurname,
+            newAge = newAge,
+        )
     }
 
     override suspend fun getHuman(id: Long): Human {
@@ -43,10 +50,20 @@ class AdapterHumanRepository @Inject constructor(
         }
     }
 
-    override suspend fun updateHuman(human: Human): Int {
-        val humanModel = humanMapper.toHumanModel(human)
+    override suspend fun updateHuman(
+        initialHuman: Human,
+        newName: String,
+        newSurname: String,
+        newAge: String,
+    ): Int {
+        val humanModel = humanMapper.toHumanModel(initialHuman)
 
-        return humanDataRepository.updateHuman(humanModel)
+        return humanDataRepository.updateHuman(
+            initialHuman = humanModel,
+            newName = newName,
+            newSurname = newSurname,
+            newAge = newAge,
+        )
     }
 
     override suspend fun deleteHuman(id: Long): Int {

@@ -7,9 +7,18 @@ import kotlinx.coroutines.flow.Flow
 
 interface HumanDataRepository {
 
-    suspend fun insertHuman(model: HumanModel): Uri
+    suspend fun insertHuman(
+        newName: String,
+        newSurname: String,
+        newAge: String,
+    ): Uri
 
-    suspend fun updateHuman(model: HumanModel): Int
+    suspend fun updateHuman(
+        initialHuman: HumanModel,
+        newName: String,
+        newSurname: String,
+        newAge: String,
+    ): Int
 
     suspend fun deleteHuman(id: Long): Int
 
