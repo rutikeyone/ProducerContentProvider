@@ -4,6 +4,7 @@
     <string name="the_list_is_empty">The list is empty</string>
     <string name="details">Details</string>
     <string name="add_human">Add Human</string>
+    <string name="add">Add</string>
     <string name="name">Name</string>
     <string name="surname">Surname</string>
     <string name="age">Age</string>

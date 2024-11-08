@@ -5,6 +5,13 @@
     <permission android:name="com.producer.human.provider.READ_DATA" />
     <permission android:name="com.producer.human.provider.WRITE_DATA" />
 
+    <uses-permission
+        android:name="com.producer.human.provider.READ_DATA"
+        android:protectionLevel="normal"/>
+    <uses-permission
+        android:name="com.producer.human.provider.WRITE_DATA"
+        android:protectionLevel="normal"/>
+
     <application
         android:name=".App"
         android:allowBackup="true"
@@ -22,8 +29,10 @@
             android:authorities="com.producer.human.provider"
             android:enabled="true"
             android:exported="true"
+            android:grantUriPermissions="true"
             android:readPermission="com.producer.human.provider.READ_DATA"
-            android:writePermission="com.producer.human.provider.WRITE_DATA"/>
+            android:writePermission="com.producer.human.provider.WRITE_DATA"
+            />
 
         <activity
             android:name=".MainActivity"

@@ -93,7 +93,7 @@ fun AddHumanView(
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 titleContentColor = MaterialTheme.colorScheme.primary,
             ), title = {
-                Text(stringResource(R.string.add_human))
+                Text(stringResource(R.string.add))
             })
         },
     ) { innerPadding ->
