@@ -1,12 +1,12 @@
-## Producer-Content-Provider 
 ![GitHub](https://img.shields.io/github/license/IgorVolochay/Face-recognition?style=flat-square&color=blue) &nbsp;
+## Producer-Content-Provider 
 
 ## Description 
 
 A mobile application showcasing the implementation of a content provider for the Android operating system.
-<br><br>
+<br>
 The application is built using clean architecture principles and follows a multi-module design approach.
-<br><br>
+<br>
 It is part of a client-server architecture, where this mobile application functions as the server.
 <br><br>
 The client application can be found here: [https://github.com/rutikeyone/consumer-content-provider](https://github.com/rutikeyone/consumer-content-provider).
