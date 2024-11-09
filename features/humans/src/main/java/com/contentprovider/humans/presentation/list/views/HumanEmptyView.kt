@@ -2,6 +2,8 @@ package com.contentprovider.humans.presentation.list.views
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -14,7 +16,8 @@ import com.contentprovider.humans.R
 fun HumanEmptyView() {
     Box(
         modifier = Modifier
-            .fillMaxSize(),
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
         contentAlignment = Alignment.Center,
     ) {
         Text(
