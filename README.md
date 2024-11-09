@@ -23,7 +23,8 @@ The client application can be found here: [https://github.com/rutikeyone/consume
 ## Features
 * `Get list humans`;
 * `Add human`;
-* `Update human data`.
+* `Update human data`;
+* `Get human details`.
 
 ## Architecture
 
