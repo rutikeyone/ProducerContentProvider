@@ -3,9 +3,13 @@
 
 ## Description 
 
-A mobile application that is an example of a content provider implementation for the Android operating system.
+A mobile application showcasing the implementation of a content provider for the Android operating system.
 <br><br>
-The mobile application is implemented using a clean architecture and multi-modularity.
+The application is built using clean architecture principles and follows a multi-module design approach.
+<br><br>
+It is part of a client-server architecture, where this mobile application functions as the server.
+<br><br>
+The client application can be found here: [https://github.com/rutikeyone/producer-content-provider](https://github.com/rutikeyone/producer-content-provider).
 
 ## Technologies used
 * `Kotlin`;
