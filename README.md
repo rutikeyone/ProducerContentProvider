@@ -24,15 +24,15 @@ The mobile application is implemented using a clean architecture and multi-modul
 ## Screenshots
 
 <p align="start">
-  <img src="https://github.com/rutikeyone/producer-content-provider/blob/master/metadata/screenshots/1.png" width="300"/>
-  <img src="https://github.com/rutikeyone/producer-content-provider/blob/master/metadata/screenshots/2.png" width="300"/>
-  <img src="https://github.com/rutikeyone/producer-content-provider/blob/master/metadata/screenshots/3.png" width="300"/> 
+  <img src="https://github.com/rutikeyone/producer-content-provider/blob/master/metadata/screenshots/1.png" width="250"/>
+  <img src="https://github.com/rutikeyone/producer-content-provider/blob/master/metadata/screenshots/2.png" width="250"/>
+  <img src="https://github.com/rutikeyone/producer-content-provider/blob/master/metadata/screenshots/3.png" width="250"/> 
 </p>
 
 ## Video with an example of the work
 
 <a href="https://youtube.com/shorts/6aUqL0jpHtQ?feature=share">
-  <img src="https://github.com/rutikeyone/producer-content-provider/blob/master/metadata/screenshots/1.png" width="300" />
+  <img src="https://github.com/rutikeyone/producer-content-provider/blob/master/metadata/screenshots/1.png" width="250" />
 </a>
 
 ## Building the Code
