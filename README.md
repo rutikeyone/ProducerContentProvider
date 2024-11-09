@@ -1,7 +1,7 @@
 ## Producer-Content-Provider 
 ![GitHub](https://img.shields.io/github/license/IgorVolochay/Face-recognition?style=flat-square&color=blue) &nbsp;
 
-## Descriotion 
+## Description 
 
 A mobile application that is an example of a content provider implementation for the Android operating system.
 <br><br>
