@@ -29,7 +29,7 @@ The mobile application is implemented using a clean architecture and multi-modul
   <img src="https://github.com/rutikeyone/producer-content-provider/blob/master/metadata/screenshots/3.png" width="300"/> 
 </p>
 
-## An example of the work
+## Video with an example of the work
 
 <a href="https://youtube.com/shorts/6aUqL0jpHtQ?feature=share">
   <img src="https://github.com/rutikeyone/producer-content-provider/blob/master/metadata/screenshots/1.png" width="300" />
