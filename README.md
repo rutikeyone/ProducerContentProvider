@@ -24,9 +24,9 @@ The mobile application is implemented using a clean architecture and multi-modul
 ## Screenshots
 
 <p align="start">
-  <img src="https://github.com/rutikeyone/producer-content-provider/blob/master/metadata/screenshots/1.png" width="250"/>
-  <img src="https://github.com/rutikeyone/producer-content-provider/blob/master/metadata/screenshots/2.png" width="250"/>
-  <img src="https://github.com/rutikeyone/producer-content-provider/blob/master/metadata/screenshots/3.png" width="250"/> 
+  <img src="https://github.com/rutikeyone/producer-content-provider/blob/master/metadata/screenshots/1.png" width="300"/>
+  <img src="https://github.com/rutikeyone/producer-content-provider/blob/master/metadata/screenshots/2.png" width="300"/>
+  <img src="https://github.com/rutikeyone/producer-content-provider/blob/master/metadata/screenshots/3.png" width="300"/> 
 </p>
 
 ## An example of the work
