@@ -21,6 +21,12 @@ The mobile application is implemented using a clean architecture and multi-modul
 * `Add human`;
 * `Update human data`.
 
+## Architecture
+
+<p align="start">
+  <img src="https://github.com/rutikeyone/producer-content-provider/blob/master/metadata/screenshots/MVI-arhitecture.jpg"/> 
+</p>
+
 ## Screenshots
 
 <p align="start">
