@@ -42,7 +42,7 @@ The client application can be found here: [https://github.com/rutikeyone/consume
 
 ## Video with an example of the work
 
-<a href="https://youtube.com/shorts/6aUqL0jpHtQ?feature=share">
+<a href="https://youtu.be/zDP9FEP9u9s">
   <img src="https://github.com/rutikeyone/producer-content-provider/blob/master/metadata/screenshots/1.png" width="250" />
 </a>
 
