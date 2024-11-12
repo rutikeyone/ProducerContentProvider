@@ -13,11 +13,11 @@ The client application can be found here: [https://github.com/rutikeyone/consume
 
 ## Technologies used
 * `Kotlin`;
-* `Jetpack-Compose`;
+* `Jetpack compose`;
 * `Coroutines`;
-* `Clean-Architectures`;
-* `Multi-Modularity`;
-* `Content-Provider`;
+* `Clean architecture`;
+* `Multi modularity`;
+* `Content provider`;
 * `Sqlite`.
 
 ## Features
